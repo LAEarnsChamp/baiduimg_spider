@@ -9,8 +9,23 @@
         <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
 
         <style type="text/css">
-            #imgs_group{
-                margin:10px;
+            .imgs_group {
+                -moz-column-count:6; /* Firefox */
+                -webkit-column-count:6; /* Safari 和 Chrome */
+                column-count:6;
+                -moz-column-gap: 2px;
+                -webkit-column-gap: 2px;
+                column-gap: 2px;
+                margin:10px auto;
+            }
+            .img_item {
+                -moz-page-break-inside: avoid;
+                -webkit-column-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .img_item img{
+                width: 100%;
+                height:100%;
             }
         </style>
     </head>
@@ -21,7 +36,7 @@
                 <div class="col-md-16">
                     <center>
                         <h3>
-                            林晓栩要的东西
+                            图 片 爬 虫
                         </h3>
                     </center>
                 </div>
@@ -34,49 +49,75 @@
                     <input type="text" class="form-control" placeholder="what do you want" id="search_terms" >
                 </div>
                 <div class="col-md-3">
-                    <button type="button" value="search" class="btn btn-primary col-md-4" onclick="seek_pic()">search</button>
+                    <button type="button" value="search" class="btn btn-primary col-md-4" onclick="start_seek()">search</button>
                 </div>
             </div>
 
-            <div class="row" id="imgs_group">
+            <div id="imgs_groups">
             </div>
 
         </div>
-
-        <script type="text/javascript">
-            document.onkeydown = function (e) { // 回车提交表单
-            // 兼容FF和IE和Opera
-                var theEvent = window.event || e;
-                var code = theEvent.keyCode || theEvent.which || theEvent.charCode;
-                if (code == 13) {
-                    seek_pic();
-                }
-            }
-
-            // ajax request pics from server
-            function seek_pic(){
-                $("#imgs_group").empty() //clear last pics group
-                $.ajax({
-                    type: "GET",
-                    url: "http://127.0.0.1:8080/?search_terms=" + String($("#search_terms").val()),
-                    dataType: "json",
-                    // jsonp: "callback",
-                    // jsonpCallback: "callback",//回调方法，与服务器配合
-                    success: function(data){
-                        urls = data['urls'];
-                        for(j = 1, len=urls.length+1; j < len; j++) {
-                            // generate thumbNail Image
-                            $("#imgs_group").append("\
-                                    <div class='col-xs-6 col-md-2'><a href='" + String(urls[j]) + "' class='thumbnail'><img style='width: 175px; height: 155px;' src='" + String(urls[j]) + "' class='img-responsive'></a></div>\
-                                ");
-                        }
-                    },
-                    error: function() {
-                        alert('失败');
-                    }
-                });
-            }
-        </script>
-
     </body>
+    <script type="text/javascript">
+        n = 0; // n*30 of pics loaded
+
+        // start new pics research
+        function start_seek() {
+            $("#imgs_groups").empty() //clear last pics group
+            n = 0; //reload times of pics loaded
+            seek_pic();
+        }
+
+        // ajax request pics from server
+        function seek_pic(){
+            pn = n * 30;
+            $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:8080/?search_terms=" + String($("#search_terms").val())
+                                                                    + "&pn=" + pn,
+                dataType: "json",
+                // jsonp: "callback",
+                // jsonpCallback: "callback",//回调方法，与服务器配合
+                success: function(data){
+                    urls = data['urls'];
+                    $("#imgs_groups").append("<div class='imgs_group' id='imgs_group" + String(n) + "'></div>");
+                    for(j = 1, len=urls.length+1; j < len; j++) {
+                        // generate thumbNail Image
+                        $("#imgs_group" + String(n)).append("\
+                                <div class='img_item'><a href='" + String(urls[j]) + "'  target='_blank'><img src='" + String(urls[j]) + "' class='img-responsive'/></a></div>");
+                    }
+                },
+                error: function() {
+                    alert('pics loading failed');
+                }
+            });
+            n += 1;
+        }
+
+        function on_img(img) {
+            img.style.display = 'none';
+        }
+
+        // pull up to load pics
+        $(window).scroll(function(){
+            var scrollTop = $(this).scrollTop(); //滚动条距离顶部的高度
+            var scrollHeight = $(document).height(); //当前页面的总高度
+            var clientHeight = $(this).height(); //当前可视的页面高度
+            if(scrollTop + clientHeight >= scrollHeight - 1){
+            //距离顶部+当前高度 >=文档总高度 即代表滑动到底部 注：-50 上拉加载更灵敏
+                seek_pic();
+            }
+        });
+
+        document.onkeydown = function (e) { // 回车提交表单
+        // 兼容FF和IE和Opera
+            var theEvent = window.event || e;
+            var code = theEvent.keyCode || theEvent.which || theEvent.charCode;
+            if (code == 13) {
+                start_seek();
+            }
+        }
+    </script>
+
+    
 </html>

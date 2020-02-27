@@ -12,9 +12,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 
-
-
-def spider(keywords):
+def spider(keywords, pn):
     """
     XHR request
     """
@@ -26,6 +24,7 @@ def spider(keywords):
     queryWord, word: pics keywords
     """
     keywords = keywords
+    pn = pn
     payload = {
         "tn": "resultjson_com",
         "ipn": "rj",
@@ -42,11 +41,11 @@ def spider(keywords):
         "face": "0",
         "istype": "2",
         "nc": "1",
-        "pn": "0",
+        "pn": pn,
         "rn": "30"
             }
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html",
         "referer": "https://image.baidu.com"
     }
 
@@ -88,10 +87,12 @@ def exec():
     """
     run spider
     """
+    # args
     keywords = request.args.get("search_terms")
-    text = spider(keywords).text
+    pn = request.args.get("pn")
+    # spider and parser of pics' urls
+    text = spider(keywords, pn).text
     pic_urls = pic_urls_parser(text)
-
     # convert list to json and response
     reponse = {"urls": pic_urls}
     return json.dumps(reponse)
