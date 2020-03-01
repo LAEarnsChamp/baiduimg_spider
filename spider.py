@@ -1,12 +1,15 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-# baidupictures_spider
+# baidupictures_spider server
 
 import requests
 import re
+import json
+
+import flask as flask
 from flask import Flask, request
 from flask_cors import CORS
-import json
+
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -104,32 +107,3 @@ def exec():
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)
-
-    # download pics
-    # num = 0
-    # for pic_url in pic_urls:
-    #     cate = pic_url.split(".")[-1]
-
-        # download pics
-        # content = None
-        # try:
-        #     content = requests.get(url=pic_url, timeout=5).content
-        # except requests.exceptions.ConnectTimeout:
-        #     print("failed to connect", pic_url)
-        #     continue
-        # except requests.exceptions.ReadTimeout:
-        #     print("failed to read", pic_url)
-        #     continue
-
-        # write down the pics
-        # try:
-        #     with open("{num}.{cate}".format(num=num, cate=cate), "wb+") as f:
-        #         f.write(content)
-        # except FileNotFoundError:
-        #     with open("{num}.png".format(num=num), "wb+") as f:
-        #         f.write(content)
-        # except OSError:
-        #     with open("{num}.png".format(num=num), "wb+") as f:
-        #         f.write(content)
-
-        # num += 1

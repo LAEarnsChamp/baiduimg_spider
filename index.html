@@ -60,6 +60,7 @@
     </body>
     <script type="text/javascript">
         n = 0; // n*30 of pics loaded
+        more = true; // pics are not fully loaded yet
 
         // start new pics research
         function start_seek() {
@@ -80,6 +81,13 @@
                 // jsonpCallback: "callback",//回调方法，与服务器配合
                 success: function(data){
                     urls = data['urls'];
+                    // if URLS is elements free 
+                    if (urls[0] == null) {
+                        more = false;
+                        alert('all pics have been loaded');
+                        return;
+                    }
+                    // response urls
                     $("#imgs_groups").append("<div class='imgs_group' id='imgs_group" + String(n) + "'></div>");
                     for(j = 1, len=urls.length+1; j < len; j++) {
                         // generate thumbNail Image
@@ -100,6 +108,9 @@
 
         // pull up to load pics
         $(window).scroll(function(){
+            if (more == false) {
+                return;
+            }
             var scrollTop = $(this).scrollTop(); //滚动条距离顶部的高度
             var scrollHeight = $(document).height(); //当前页面的总高度
             var clientHeight = $(this).height(); //当前可视的页面高度
